@@ -1,15 +1,18 @@
-// controllers/propertyController.js
 import axios from "axios";
 
 export const getProperties = async (req, res) => {
   try {
+    const { $select, ...restParams } = req.query;
+
     const response = await axios.get(
       "https://api.bridgedataoutput.com/api/v2/OData/fmls/Property",
       {
         params: {
           access_token: "3bd54ec671672c9ad62e3ec6d6296b8f",
           $select:
+            $select ||
             "ListPrice,BedroomsTotal,BathroomsTotalInteger,BuildingAreaTotal,UnparsedAddress",
+          ...restParams, // Pass all other query parameters from the frontend
         },
       }
     );
@@ -27,6 +30,6 @@ export const getProperties = async (req, res) => {
     console.log(properties);
   } catch (error) {
     res.status(500).json({ message: error.message });
-    console.log("errors");
+    console.log("Error:", error.message);
   }
 };
