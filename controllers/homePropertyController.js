@@ -8,7 +8,7 @@ export const getProperties = async (req, res) => {
       "https://api.bridgedataoutput.com/api/v2/OData/fmls/Property",
       {
         params: {
-          access_token: "3bd54ec671672c9ad62e3ec6d6296b8f",
+          access_token: process.env.ACES_TKEN,
           $select:
             $select ||
             "ListPrice,BedroomsTotal,BathroomsTotalInteger,BuildingAreaTotal,UnparsedAddress",
@@ -17,13 +17,26 @@ export const getProperties = async (req, res) => {
       }
     );
 
-    const properties = response.data.value.map((property) => ({
+    const filteredProperties = response.data.value.filter(
+      (property) =>
+        property.ListPrice &&
+        property.BedroomsTotal &&
+        property.BathroomsTotalInteger &&
+        property.BuildingAreaTotal &&
+        property.Media
+    );
+
+    const properties = filteredProperties.map((property) => ({
       price: property.ListPrice,
       bed: property.BedroomsTotal,
       bath: property.BathroomsTotalInteger,
       sqft: property.BuildingAreaTotal,
       address: property.UnparsedAddress,
-      image: "https://via.placeholder.com/250", // Placeholder image
+      image:
+        property.Media && property.Media.length > 0
+          ? property.Media[0].MediaURL
+          : "https://via.placeholder.com/250", // Placeholder image
+      images: property.Media && property.Media.length > 0 ? property.Media : [],
     }));
 
     res.json(properties);
